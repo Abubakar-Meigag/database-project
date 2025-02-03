@@ -19,7 +19,13 @@ variable "subnet_cidr" {
 variable "instance_type" {
   description = "EC2 Instance Type"
   type        = string
-  default     = "t3.micro"
+  default     = "t2.micro"
+}
+
+variable "ami_id" {
+  description = "AMI ID to use for EC2 Instance"
+  type        = string
+  default     = "ami-0aa9ffd4190a83e11"
 }
 
 variable "db_password" {
