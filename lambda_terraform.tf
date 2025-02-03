@@ -30,14 +30,22 @@ resource "aws_iam_role" "lambda_exec" {
 resource "aws_iam_policy" "lambda_ec2_control" {
   name        = "lambda-ec2-control"
   description = "Allow Lambda to start/stop EC2"
-  policy      = jsonencode({
-    Statement = [{
-      Action   = ["ec2:StartInstances", "ec2:StopInstances"]
-      Effect   = "Allow"
-      Resource = "*"
-    }]
+  
+  policy = jsonencode({
+    Version = "2012-10-17" # ✅ Add this line to fix the error
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:StartInstances",
+          "ec2:StopInstances"
+        ]
+        Resource = "*"
+      }
+    ]
   })
 }
+
 
 resource "aws_iam_role_policy_attachment" "lambda_attach" {
   role       = aws_iam_role.lambda_exec.name
