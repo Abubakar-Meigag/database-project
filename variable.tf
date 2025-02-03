@@ -36,5 +36,4 @@ variable "key_name" {
 variable "allowed_ip" {
   description = "Allowed IP address for SSH access (e.g., your home IP)"
   type        = string
-  default     = "YOUR_IP/32"
 }
