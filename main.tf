@@ -30,7 +30,7 @@ resource "aws_security_group" "ec2_sg" {
 
 # EC2 Instance for PostgreSQL
 resource "aws_instance" "postgres_ec2" {
-  ami                    = data.aws_ami.amzlinux2.id
+  ami                    = var.ami_id
   user_data              = file("${path.module}/app-install.sh")
   instance_type          = var.instance_type
   subnet_id              = aws_subnet.private_subnet.id
