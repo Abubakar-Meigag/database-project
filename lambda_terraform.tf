@@ -18,9 +18,10 @@ resource "aws_iam_role" "lambda_exec" {
   name = "lambda_exec_role"
   
   assume_role_policy = jsonencode({
+    Version = "2012-10-17",
     Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
+      Action = "sts:AssumeRole",
+      Effect = "Allow",
       Principal = { Service = "lambda.amazonaws.com" }
     }]
   })
@@ -31,7 +32,7 @@ resource "aws_iam_policy" "lambda_ec2_control" {
   description = "Allow Lambda to start/stop EC2"
   
   policy = jsonencode({
-    Version = "2012-10-17" # ✅ Add this line to fix the error
+    Version = "2012-10-17" 
     Statement = [
       {
         Effect = "Allow"
@@ -59,15 +60,39 @@ resource "aws_cloudwatch_event_rule" "ec2_start_schedule" {
 
 resource "aws_cloudwatch_event_rule" "ec2_stop_schedule" {
   name                = "ec2-stop-schedule"
-  schedule_expression = "cron(40 19 * * ? *)"
+  schedule_expression = "cron(46 19 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_target" "start_target" {
   rule = aws_cloudwatch_event_rule.ec2_start_schedule.name
   arn  = aws_lambda_function.ec2_scheduler.arn
+  input = jsonencode({
+    action = "start"
+  })
 }
 
 resource "aws_cloudwatch_event_target" "stop_target" {
   rule = aws_cloudwatch_event_rule.ec2_stop_schedule.name
   arn  = aws_lambda_function.ec2_scheduler.arn
+  input = jsonencode({
+    action = "stop"
+  })
 }
+
+# Allow EventBridge to Invoke Lambda
+resource "aws_lambda_permission" "allow_eventbridge_start" {
+  statement_id  = "AllowExecutionFromEventBridgeStart"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.ec2_scheduler.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.ec2_start_schedule.arn
+}
+
+resource "aws_lambda_permission" "allow_eventbridge_stop" {
+  statement_id  = "AllowExecutionFromEventBridgeStop"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.ec2_scheduler.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.ec2_stop_schedule.arn
+}
+
