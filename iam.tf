@@ -16,28 +16,30 @@ resource "aws_iam_role" "ec2_ssm_role" {
 resource "aws_iam_policy" "ssm_policy" {
   name        = "EC2SSMParameterStorePolicy"
   description = "Policy to allow EC2 to retrieve SSM parameters"
-  
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters",
-          "ssm:GetParametersByPath"
-        ],
-        Resource = "arn:aws:ssm:eu-west-2:<YOUR_AWS_ACCOUNT_ID>:parameter/myapp/*"
-      },
-      {
-        Effect = "Allow",
-        Action = [
-          "kms:Decrypt"
-        ],
-        Resource = "*"
-      }
-    ]
-  })
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParametersByPath"
+      ],
+      "Resource": "arn:aws:ssm:eu-west-2:<YOUR_AWS_ACCOUNT_ID>:parameter/myapp/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+EOF
 }
 
 resource "aws_iam_role_policy_attachment" "ssm_attach" {
