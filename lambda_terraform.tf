@@ -8,7 +8,6 @@ resource "aws_lambda_function" "ec2_scheduler" {
 
   environment {
     variables = {
-      AWS_REGION  = "eu-west-2"
       INSTANCE_ID = aws_instance.postgres_ec2.id
     }
   }
