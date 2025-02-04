@@ -4,7 +4,7 @@ resource "aws_lambda_function" "ec2_scheduler" {
   function_name = "ec2-start-stop"
   role          = aws_iam_role.lambda_exec.arn
   handler       = "lambda_function.lambda_handler"
-  runtime       = "python3.8"
+  runtime       = "python3.9"
 
   environment {
     variables = {
