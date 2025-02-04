@@ -1,6 +1,10 @@
 # VPC and Subnet
 resource "aws_vpc" "my_data_vpc" {
   cidr_block = var.vpc_cidr
+
+  tags = {
+    Name = "database-vpc"
+  }
 }
 
 resource "aws_subnet" "private_subnet" {
