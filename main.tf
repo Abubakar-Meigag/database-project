@@ -19,7 +19,7 @@ resource "aws_internet_gateway" "database-vpc-igw" {
 # Public Subnet
 resource "aws_subnet" "database-vpc-public-subnet" {
   vpc_id                  = aws_vpc.database-vpc.id
-  cidr_block              = "10.0.2.0/24"
+  cidr_block              = var.public_subnet_cidr
   map_public_ip_on_launch = true
 
   tags = {
@@ -47,53 +47,42 @@ resource "aws_route_table_association" "database-vpc-public-subnet-association" 
   route_table_id = aws_route_table.database-vpc-public-route-table.id
 }
 
-# Private Subnet
-resource "aws_subnet" "database-vpc-private-subnet" {
-  vpc_id                  = aws_vpc.database-vpc.id
-  cidr_block              = var.subnet_cidr
-  map_public_ip_on_launch = false
-
-  tags = {
-    Name = "database-vpc-private-subnet"
-  }
-}
-
-# Security Group for EC2 Instance
-resource "aws_security_group" "database-vpc-ec2-sg" {
+# Security Group for PostgreSQL Server
+resource "aws_security_group" "postgres-sg" {
   vpc_id = aws_vpc.database-vpc.id
 
-  ingress {
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
-    security_groups = [aws_security_group.bastion-sg.id]  # Corrected
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "database-vpc-ec2-sg"
-  }
-}
-
-# Security Group for Bastion Host
-resource "aws_security_group" "bastion-sg" {
-  vpc_id = aws_vpc.database-vpc.id
-
-  # Allow SSH from your laptop only
+  # Allow SSH from your IP
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.allowed_ip]  # Only allow your laptop's public IP
+    cidr_blocks = [var.allowed_ip]
   }
 
-  # Allow all outbound traffic (for SSH forwarding)
+  # Allow PostgreSQL traffic from your IP
+  ingress {
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = [var.allowed_ip]
+  }
+
+  # Allow HTTP/HTTPS for NGINX reverse proxy
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow all outbound traffic
   egress {
     from_port   = 0
     to_port     = 0
@@ -102,7 +91,7 @@ resource "aws_security_group" "bastion-sg" {
   }
 
   tags = {
-    Name = "bastion-sg"
+    Name = "postgres-sg"
   }
 }
 
@@ -111,26 +100,13 @@ resource "aws_instance" "postgres_ec2" {
   ami                    = var.ami_id
   user_data              = file("${path.module}/app-install.sh")
   instance_type          = var.instance_type
-  subnet_id              = aws_subnet.database-vpc-private-subnet.id
-  vpc_security_group_ids = [aws_security_group.database-vpc-ec2-sg.id]
+  subnet_id              = aws_subnet.database-vpc-public-subnet.id
+  vpc_security_group_ids = [aws_security_group.postgres-sg.id]
   iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.name
   key_name               = var.key_name
 
   tags = {
     Name = "PostgreSQL-Server"
-  }
-}
-
-# Bastion Host
-resource "aws_instance" "bastion" {
-  ami                    = var.ami_id
-  instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.database-vpc-public-subnet.id
-  vpc_security_group_ids = [aws_security_group.bastion-sg.id]
-  key_name               = var.key_name
-
-  tags = {
-    Name = "Bastion-Host"
   }
 }
 

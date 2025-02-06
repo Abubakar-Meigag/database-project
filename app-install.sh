@@ -38,22 +38,46 @@ CREATE DATABASE myDB;
 GRANT ALL PRIVILEGES ON DATABASE myDB TO myProjectData;
 EOF
 
-# Install Apache Web Server for a Basic Web Interface
-# sudo yum install -y httpd
-# sudo systemctl enable httpd
-# sudo systemctl start httpd
+# Install NGINX for reverse proxy
+sudo yum install -y nginx
+
+# Configure NGINX as a reverse proxy for PostgreSQL
+sudo tee /etc/nginx/conf.d/postgres-proxy.conf <<EOF
+server {
+    listen 80;
+    server_name _;
+
+    location / {
+        proxy_pass http://localhost:5432;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+
+# Start and enable NGINX
+sudo systemctl enable nginx
+sudo systemctl start nginx
 
 # Allow HTTP traffic in the OS firewall
 sudo firewall-cmd --add-service=http --permanent
 sudo firewall-cmd --reload
 
+# Install Apache Web Server for a Basic Web Interface
+sudo yum install -y httpd
+
+# Enable and start Apache
+sudo systemctl enable httpd
+sudo systemctl start httpd
+
 # Create a simple HTML page
-# echo 'Welcome to New Stack to build and host database into EC2 instance' | sudo tee /var/www/html/index.html
-# sudo mkdir -p /var/www/html/app1
+echo 'Welcome to New Stack to build and host database into EC2 instance' | sudo tee /var/www/html/index.html
 
 # Ensure correct ownership and permissions for Apache web root
-# sudo chown -R apache:apache /var/www/html
-# sudo chmod -R 755 /var/www/html
+sudo chown -R apache:apache /var/www/html
+sudo chmod -R 755 /var/www/html
 
 # Indicate script completion
-echo "User data script completed successfully. Welcome to New Stack to build and host database into EC2 instance"
+echo "User data script completed successfully. PostgreSQL, NGINX, and Apache are now running."

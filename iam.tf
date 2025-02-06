@@ -14,6 +14,7 @@ resource "aws_iam_role" "ec2_ssm_role" {
 }
 
 data "aws_caller_identity" "current" {}
+
 resource "aws_iam_policy" "ssm_policy" {
   name        = "EC2SSMParameterStorePolicy"
   description = "Policy to allow EC2 to retrieve SSM parameters"
@@ -43,24 +44,7 @@ resource "aws_iam_policy" "ssm_policy" {
 
 resource "aws_iam_instance_profile" "ec2_instance_profile" {
   name = "ec2-instance-profile"
-  role = aws_iam_role.ec2_role.name
-}
-
-resource "aws_iam_role" "ec2_role" {
-  name = "ec2-role"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
-        Principal = {
-          Service = "ec2.amazonaws.com"
-        }
-      }
-    ]
-  })
+  role = aws_iam_role.ec2_ssm_role.name
 }
 
 resource "aws_iam_role_policy_attachment" "ssm_attach" {
