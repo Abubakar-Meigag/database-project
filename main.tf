@@ -47,6 +47,10 @@ resource "aws_route_table_association" "database-vpc-public-subnet-association" 
   route_table_id = aws_route_table.database-vpc-public-route-table.id
 }
 
+data "http" "my_ip" {
+  url = "https://ifconfig.me"
+}
+
 # Security Group for PostgreSQL Server
 resource "aws_security_group" "postgres-sg" {
   vpc_id = aws_vpc.database-vpc.id
@@ -56,30 +60,15 @@ resource "aws_security_group" "postgres-sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = [var.allowed_ip]
+    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }
 
-  # Allow PostgreSQL traffic from your IP
+  # Allow PostgreSQL traffic **ONLY from SSM Port Forwarding (localhost)**
   ingress {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = [var.allowed_ip]
-  }
-
-  # Allow HTTP/HTTPS for NGINX reverse proxy
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["127.0.0.1/32"]
   }
 
   # Allow all outbound traffic
@@ -94,6 +83,7 @@ resource "aws_security_group" "postgres-sg" {
     Name = "postgres-sg"
   }
 }
+
 
 # EC2 Instance for PostgreSQL
 resource "aws_instance" "postgres_ec2" {
