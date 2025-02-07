@@ -22,8 +22,8 @@ sudo systemctl start postgresql
 sleep 30
 
 # Configure PostgreSQL to allow password authentication
-sudo sed -i "s/^#listen_addresses = 'localhost'/listen_addresses = '*'/'" /var/lib/pgsql/data/postgresql.conf
-sudo sed -i "s/^host.*all.*all.*127.0.0.1\/32.*ident/host all all 0.0.0.0\/0 md5/" /var/lib/pgsql/data/pg_hba.conf
+sudo sed -i "s/^#listen_addresses = 'localhost'/listen_addresses = 'localhost'/" /var/lib/pgsql/data/postgresql.conf
+sudo sed -i "s/^host.*all.*all.*127.0.0.1\/32.*ident/host all all 127.0.0.1\/32 md5/" /var/lib/pgsql/data/pg_hba.conf
 
 # Restart PostgreSQL to apply changes
 sudo systemctl restart postgresql
@@ -33,8 +33,22 @@ DB_PASSWORD=$(aws ssm get-parameter --name "/myapp/db_password" --with-decryptio
 
 # Create a PostgreSQL user and database securely
 sudo -u postgres psql <<EOF
-CREATE USER myProjectData WITH PASSWORD '${DB_PASSWORD}';
-CREATE DATABASE myDB;
+DO \$\$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'myProjectData') THEN
+    CREATE USER myProjectData WITH PASSWORD '${DB_PASSWORD}';
+  END IF;
+END
+\$\$;
+
+DO \$\$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_database WHERE datname = 'myDB') THEN
+    CREATE DATABASE myDB;
+  END IF;
+END
+\$\$;
+
 GRANT ALL PRIVILEGES ON DATABASE myDB TO myProjectData;
 EOF
 
@@ -48,7 +62,7 @@ server {
     server_name _;
 
     location / {
-        proxy_pass http://localhost:5432;
+        proxy_pass http://localhost:5000;
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -65,10 +79,8 @@ sudo systemctl start nginx
 sudo firewall-cmd --add-service=http --permanent
 sudo firewall-cmd --reload
 
-# Install Apache Web Server for a Basic Web Interface
+# Install Apache Web Server for a Basic Web Interface (optional, but not recommended with NGINX)
 sudo yum install -y httpd
-
-# Enable and start Apache
 sudo systemctl enable httpd
 sudo systemctl start httpd
 
@@ -80,4 +92,4 @@ sudo chown -R apache:apache /var/www/html
 sudo chmod -R 755 /var/www/html
 
 # Indicate script completion
-echo "User data script completed successfully. PostgreSQL, NGINX, and Apache are now running."
+echo "User data script completed successfully. PostgreSQL and NGINX are now running."
