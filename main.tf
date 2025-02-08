@@ -47,9 +47,9 @@ resource "aws_route_table_association" "database-vpc-public-subnet-association" 
   route_table_id = aws_route_table.database-vpc-public-route-table.id
 }
 
-data "http" "my_ip" {
-  url = "https://ifconfig.me"
-}
+# data "http" "my_ip" {
+#   url = "https://ifconfig.me"
+# }
 
 # Security Group for PostgreSQL Server
 resource "aws_security_group" "postgres-sg" {
@@ -60,7 +60,7 @@ resource "aws_security_group" "postgres-sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   # Allow PostgreSQL traffic **ONLY from SSM Port Forwarding (localhost)**
