@@ -60,7 +60,7 @@ resource "aws_cloudwatch_event_rule" "ec2_start_schedule" {
 
 resource "aws_cloudwatch_event_rule" "ec2_stop_schedule" {
   name                = "ec2-stop-schedule"
-  schedule_expression = "cron(59 11 * * ? *)"
+  schedule_expression = "cron(30 11 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_target" "start_target" {
