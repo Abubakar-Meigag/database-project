@@ -62,6 +62,18 @@ resource "aws_security_group" "postgres-sg" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
   # Allow PostgreSQL traffic **ONLY from SSM Port Forwarding (localhost)**
   ingress {
@@ -95,6 +107,13 @@ resource "aws_instance" "postgres_ec2" {
   iam_instance_profile   = aws_iam_instance_profile.ec2_instance_profile.name
   key_name               = var.key_name
 
+
+  # Configure Root Volume Size to 20GB
+  root_block_device {
+    volume_size = 20
+    volume_type = "gp3"
+    delete_on_termination = true
+  }
   tags = {
     Name = "PostgreSQL-Server"
   }

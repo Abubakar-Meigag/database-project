@@ -29,9 +29,9 @@ variable "instance_type" {
 }
 
 variable "ami_id" {
-  description = "AMI ID to use for EC2 Instance"
+  description = "Ubuntu 22.04 LTS AMI ID"
   type        = string
-  default     = "ami-0aa9ffd4190a83e11"
+  default     = "ami-091f18e98bc129c4e "
 }
 
 variable "db_password" {
