@@ -31,7 +31,7 @@ variable "instance_type" {
 variable "ami_id" {
   description = "Ubuntu 22.04 LTS AMI ID"
   type        = string
-  default     = "ami-091f18e98bc129c4e "
+  default     = "ami-091f18e98bc129c4e"
 }
 
 variable "db_password" {
