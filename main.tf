@@ -71,6 +71,13 @@ resource "aws_security_group" "postgres-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  ingress {
+    from_port   = 8000
+    to_port     = 8000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Allow public access
+  }
+
   # Allow PostgreSQL traffic **ONLY from SSM Port Forwarding (localhost)**
   ingress {
     from_port   = 5432
@@ -106,8 +113,8 @@ resource "aws_instance" "postgres_ec2" {
 
   # Configure Root Volume Size to 20GB
   root_block_device {
-    volume_size = 20
-    volume_type = "gp3"
+    volume_size           = 20
+    volume_type           = "gp3"
     delete_on_termination = true
   }
   tags = {
