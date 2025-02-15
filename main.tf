@@ -78,7 +78,6 @@ resource "aws_security_group" "postgres-sg" {
     cidr_blocks = ["0.0.0.0/0"] # Allow public access
   }
 
-  # Allow PostgreSQL traffic **ONLY from SSM Port Forwarding (localhost)**
   ingress {
     from_port   = 5432
     to_port     = 5432
@@ -123,8 +122,8 @@ resource "aws_instance" "postgres_ec2" {
 }
 
 # Store DB Credentials in AWS SSM Parameter Store
-resource "aws_ssm_parameter" "db_password" {
-  name  = "/myapp/db_password"
-  type  = "SecureString"
-  value = var.db_password
-}
+# resource "aws_ssm_parameter" "db_password" {
+#   name  = "/myapp/db_password"
+#   type  = "SecureString"
+#   value = var.db_password
+# }

@@ -29,15 +29,9 @@ variable "instance_type" {
 }
 
 variable "ami_id" {
-  description = "Ubuntu 22.04 LTS AMI ID"
+  description = "Amazon Linux 2 AMI ID"
   type        = string
-  default     = "ami-091f18e98bc129c4e"
-}
-
-variable "db_password" {
-  description = "Database password for PostgreSQL stored securely in AWS SSM Parameter Store"
-  type        = string
-  sensitive   = true
+  default     = "ami-03a725ae7d906005d"
 }
 
 variable "key_name" {
@@ -45,7 +39,14 @@ variable "key_name" {
   type        = string
 }
 
-variable "allowed_ip" {
-  description = "Allowed IP address for SSH access (e.g., your home IP)"
-  type        = string
-}
+
+# variable "db_password" {
+#   description = "Database password for PostgreSQL stored securely in AWS SSM Parameter Store"
+#   type        = string
+#   sensitive   = true
+# }
+
+# variable "allowed_ip" {
+#   description = "Allowed IP address for SSH access (e.g., your home IP)"
+#   type        = string
+# }
