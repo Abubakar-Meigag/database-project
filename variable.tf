@@ -39,14 +39,13 @@ variable "key_name" {
   type        = string
 }
 
+# variable "allowed_ip" {
+#   description = "Allowed IP address for SSH access (e.g., your home IP)"
+#   type        = string
+# }
 
 # variable "db_password" {
 #   description = "Database password for PostgreSQL stored securely in AWS SSM Parameter Store"
 #   type        = string
 #   sensitive   = true
-# }
-
-# variable "allowed_ip" {
-#   description = "Allowed IP address for SSH access (e.g., your home IP)"
-#   type        = string
 # }

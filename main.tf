@@ -47,6 +47,11 @@ resource "aws_route_table_association" "database-vpc-public-subnet-association" 
   route_table_id = aws_route_table.database-vpc-public-route-table.id
 }
 
+# Fetch your public IP address
+data "http" "my_ip" {
+  url = "https://checkip.amazonaws.com"
+}
+
 # Security Group for PostgreSQL Server
 resource "aws_security_group" "postgres-sg" {
   vpc_id = aws_vpc.database-vpc.id
@@ -56,7 +61,7 @@ resource "aws_security_group" "postgres-sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }
   ingress {
     from_port   = 80
@@ -69,13 +74,6 @@ resource "aws_security_group" "postgres-sg" {
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 8000
-    to_port     = 8000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # Allow public access
   }
 
   ingress {
