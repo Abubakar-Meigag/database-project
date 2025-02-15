@@ -47,10 +47,6 @@ resource "aws_route_table_association" "database-vpc-public-subnet-association" 
   route_table_id = aws_route_table.database-vpc-public-route-table.id
 }
 
-# data "http" "my_ip" {
-#   url = "https://ifconfig.me"
-# }
-
 # Security Group for PostgreSQL Server
 resource "aws_security_group" "postgres-sg" {
   vpc_id = aws_vpc.database-vpc.id
@@ -80,7 +76,7 @@ resource "aws_security_group" "postgres-sg" {
     from_port   = 5432
     to_port     = 5432
     protocol    = "tcp"
-    cidr_blocks = ["127.0.0.1/32"]
+    cidr_blocks = [var.vpc_cidr]
   }
 
   # Allow all outbound traffic
