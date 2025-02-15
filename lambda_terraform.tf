@@ -55,12 +55,12 @@ resource "aws_iam_role_policy_attachment" "lambda_attach" {
 # EventBridge Scheduler to Trigger Lambda
 resource "aws_cloudwatch_event_rule" "ec2_start_schedule" {
   name                = "ec2-start-schedule"
-  schedule_expression = "cron(0 7 * * ? *)"
+  schedule_expression = "cron(0 10 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_rule" "ec2_stop_schedule" {
   name                = "ec2-stop-schedule"
-  schedule_expression = "cron(59 19 * * ? *)"
+  schedule_expression = "cron(59 11 * * ? *)"
 }
 
 resource "aws_cloudwatch_event_target" "start_target" {
