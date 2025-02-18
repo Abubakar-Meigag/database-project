@@ -110,7 +110,7 @@ resource "aws_instance" "postgres_ec2" {
 
   # Configure Root Volume Size to 20GB
   root_block_device {
-    volume_size           = 1
+    volume_size           = 8
     volume_type           = "gp3"
     delete_on_termination = true
   }
