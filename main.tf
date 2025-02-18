@@ -61,21 +61,7 @@ resource "aws_security_group" "postgres-sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 8000
-    to_port     = 8000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 3000
-    to_port     = 3000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["${chomp(data.http.my_ip.response_body)}/32"]
   }
   ingress {
     from_port   = 80
@@ -124,7 +110,7 @@ resource "aws_instance" "postgres_ec2" {
 
   # Configure Root Volume Size to 20GB
   root_block_device {
-    volume_size           = 30
+    volume_size           = 1
     volume_type           = "gp3"
     delete_on_termination = true
   }
