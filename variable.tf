@@ -29,9 +29,9 @@ variable "instance_type" {
 }
 
 variable "ami_id" {
-  description = "Amazon Linux 2 AMI ID"
+  description = "Ubuntu Server 24.04 LTS (HVM) AMI ID"
   type        = string
-  default     = "ami-03a725ae7d906005d"
+  default     = "ami-091f18e98bc129c4e"
 }
 
 variable "key_name" {
